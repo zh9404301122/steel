@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.steel.mapper.SteelCommodityMapper">
+
+    <select id="steelCount" resultType="int">
+     select count(1) from st_product t where 1 = 1
+        <if test="queryHomeBox.equal != null">
+             <if test="queryHomeBox.equal.status !=null and queryHomeBox.equal.status !=''">
+                 AND t.steelStauts = #{queryHomeBox.equal.status}
+             </if>
+            <if test="queryHomeBox.equal.name !=null and queryHomeBox.equal.name !=''">
+                AND t.name = #{queryHomeBox.equal.name}
+            </if>
+        </if>
+    </select>
+
+    <select id="steelList" resultType="Map">
+     SELECT a.id,a.name,a.steelExplain,a.phone,a.steelStauts,
+       (SELECT price  from st_price b where a.id = b.productId and createTime = #{today}) as todayPrice,
+       (SELECT situation  from st_price b where a.id = b.productId and createTime = #{today}) as todaySituation,
+       (SELECT price  from st_price b where a.id = b.productId and createTime = #{yesterday}) as yesterdayPrice,
+       (SELECT name  from st_productType b where a.steelStauts = b.id) as steelName
+       from st_product a where 1=1
+        <if test="queryHomeBox.equal != null">
+            <if test="queryHomeBox.equal.status !=null and queryHomeBox.equal.status !=''">
+                AND a.steelStauts = #{queryHomeBox.equal.status}
+            </if>
+            <if test="queryHomeBox.equal.name !=null and queryHomeBox.equal.name !=''">
+                AND t.name = #{queryHomeBox.equal.name}
+            </if>
+        </if>
+        limit #{queryHomeBox.limitStart},#{queryHomeBox.pageDataCount}
+    </select>
+
+    <select id="historyCount" resultType="int">
+        select count(1) from st_price t where 1=1
+        <if test="queryHomeBox.equal != null">
+            <if test="queryHomeBox.equal.id !=null and queryHomeBox.equal.id !=''">
+                AND t.productId = #{queryHomeBox.equal.id}
+            </if>
+            <if test="queryHomeBox.equal.createTime !=null and queryHomeBox.equal.createTime !=''">
+                AND t.createTime = #{queryHomeBox.equal.createTime}
+            </if>
+        </if>
+    </select>
+
+    <select id="historyList" resultType="map">
+         select * from st_price t where 1=1
+        <if test="queryHomeBox.equal != null">
+            <if test="queryHomeBox.equal.id !=null and queryHomeBox.equal.id !=''">
+                AND t.productId = #{queryHomeBox.equal.id}
+            </if>
+            <if test="queryHomeBox.equal.createTime !=null and queryHomeBox.equal.createTime !=''">
+                AND t.createTime like concat(concat('%',#{queryHomeBox.equal.createTime},'%'))
+            </if>
+        </if>
+        order by t.createTime DESC
+        limit #{queryHomeBox.limitStart},#{queryHomeBox.pageDataCount}
+    </select>
+
+    <insert id="addSteel">
+        INSERT INTO st_product (id,name,steelExplain,phone,steelStauts) VALUES (#{id},#{name},#{steelExplain},#{phone},#{steelStauts})
+    </insert>
+
+    <select id="addSteelCount" resultType="int">
+        select count(1) from st_product t where t.name = #{name}
+    </select>
+
+    <insert id="addSteelPrice">
+        INSERT INTO st_price (id,price,createTime,situation,productId) VALUES (#{id},#{price},#{createTime},#{situation},#{productId})
+    </insert>
+
+    <select id="addSteelPriceCount" resultType="int">
+        select count(1) from st_price where createTime = #{createTime} and productId = #{productId}
+    </select>
+
+    <update id="updatePrice">
+        update st_price set price = #{price},situation = #{situation} where createTime = #{createTime} and productId = #{productId}
+    </update>
+
+    <select id="getYesterdayPrice" resultType="String">
+        select price from st_price where createTime = #{yesterday} and productId = #{productId}
+    </select>
+
+    <select id="listTypeCount"  resultType="int">
+        select count(1) from st_productType 
+    </select>
+
+    <select id="listType" resultType="map">
+        select * from st_productType where 1=1
+        order by createTime DESC
+        limit #{queryHomeBox.limitStart},#{queryHomeBox.pageDataCount}
+    </select>
+
+    <insert id="addType">
+        INSERT INTO st_productType (id,name,createTime) VALUES (#{id},#{name},#{createTime})
+    </insert>
+
+    <select id="queryTypeCount" resultType="int">
+         select count(1) from st_productType t where t.name = #{name}
+    </select>
+
+    <select id="queryUpdateTypeCount" resultType="int">
+         select count(1) from st_productType t where t.name = #{name} and id !=#{id}
+    </select>
+
+    <update id="updateType">
+        UPDATE st_productType SET name = #{name} WHERE id = #{id}
+    </update>
+
+    <select id="updateSteelCount" resultType="int">
+         select count(1) from st_product t where t.name = #{name} and id !=#{id}
+    </select>
+
+    <update id="updateSteel">
+        UPDATE st_product SET name = #{name},steelExplain = #{steelExplain},phone = #{phone},steelStauts = #{steelStauts} WHERE id = #{id}
+    </update>
+
+</mapper>
