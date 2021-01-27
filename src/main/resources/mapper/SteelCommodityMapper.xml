@@ -18,7 +18,6 @@
      SELECT a.id,a.name,a.steelExplain,a.phone,a.steelStauts,
        (SELECT price  from st_price b where a.id = b.productId and createTime = #{today}) as todayPrice,
        (SELECT situation  from st_price b where a.id = b.productId and createTime = #{today}) as todaySituation,
-       (SELECT price  from st_price b where a.id = b.productId and createTime = #{yesterday}) as yesterdayPrice,
        (SELECT name  from st_productType b where a.steelStauts = b.id) as steelName
        from st_product a where 1=1
         <if test="queryHomeBox.equal != null">
@@ -26,9 +25,10 @@
                 AND a.steelStauts = #{queryHomeBox.equal.status}
             </if>
             <if test="queryHomeBox.equal.name !=null and queryHomeBox.equal.name !=''">
-                AND t.name = #{queryHomeBox.equal.name}
+                AND a.name like concat(concat('%',#{queryHomeBox.equal.name},'%'))
             </if>
         </if>
+        ORDER BY steelStauts ASC
         limit #{queryHomeBox.limitStart},#{queryHomeBox.pageDataCount}
     </select>
 
@@ -79,7 +79,7 @@
     </update>
 
     <select id="getYesterdayPrice" resultType="String">
-        select price from st_price where createTime = #{yesterday} and productId = #{productId}
+        select price from st_price where  productId = #{productId} order by createTime DESC limit 1,1
     </select>
 
     <select id="listTypeCount"  resultType="int">
@@ -115,5 +115,39 @@
     <update id="updateSteel">
         UPDATE st_product SET name = #{name},steelExplain = #{steelExplain},phone = #{phone},steelStauts = #{steelStauts} WHERE id = #{id}
     </update>
+
+    <insert id="addList">
+        insert into st_product
+        (id,name,steelStauts) values (#{id},#{name},#{steelStauts})
+    </insert>
+
+    <insert id="addPriceList">
+        insert into st_price
+        (id,price,createTime,situation,productId)
+        values
+        <foreach item="item" index="index" collection="list" separator=",">
+            (UUID(),#{item.newPic},#{item.time},#{item.cj},#{item.id})
+        </foreach>
+    </insert>
+
+    <delete id="delete">
+        delete from st_product where id = #{id}
+    </delete>
+
+    <delete id="deletePrice">
+         delete from st_price where productId = #{id}
+    </delete>
+
+    <select id="queryType" resultType="int">
+        select count(1) from st_product where steelStauts = #{id}
+    </select>
+
+    <delete id="deleteType">
+        delete from st_productType where id = #{id}
+    </delete>
+
+    <select id="queryYesPrice" resultType="map">
+       select * from st_price where productId = #{id} order by createTime DESC limit 1,1
+    </select>
 
 </mapper>

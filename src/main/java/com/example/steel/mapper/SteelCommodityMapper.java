@@ -51,6 +51,20 @@ public interface SteelCommodityMapper {
 
     int updateSteel(Map map);
 
+    int addList(Map map);
+
+    int addPriceList(List<Map<String,Object>> list);
+
+    int delete(String id);
+
+    int deletePrice(String id);
+
+    int queryType(String id);
+
+    int deleteType(String id);
+
+    Map<String,Object> queryYesPrice(String id);
+
 
 
 

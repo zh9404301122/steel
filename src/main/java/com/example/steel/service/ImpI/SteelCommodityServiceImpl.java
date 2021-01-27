@@ -5,6 +5,7 @@ import com.example.steel.service.SteelCommodityService;
 import com.example.steel.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,7 +15,9 @@ import java.util.Map;
  * @author:zh
  * @date:Created in 18:45 2021/1/19
  * @desc
+ * 事务添加
  */
+@Transactional
 @Service
 public class SteelCommodityServiceImpl implements SteelCommodityService {
 
@@ -32,6 +35,12 @@ public class SteelCommodityServiceImpl implements SteelCommodityService {
         int i = steelCommodityMapper.steelCount(queryHomeBox);
         queryHomeBox.setTotalCount(i);
         List<Map<String, Object>> list = steelCommodityMapper.steelList(queryHomeBox, DateUtils.getToday(), DateUtils.getYesterday());
+        //昨日价格直接
+        for(Map<String,Object> map :list){
+            Map<String, Object> mapPrice = steelCommodityMapper.queryYesPrice(map.get("id").toString());
+            map.put("yesterdayPrice",mapPrice.get("price").toString());
+            System.out.println(mapPrice);
+        }
         return new ResponseBox(list,queryHomeBox);
     }
 
@@ -198,6 +207,58 @@ public class SteelCommodityServiceImpl implements SteelCommodityService {
             steelCommodityMapper.updateSteel(map);
             responseBox.setMsg("操作成功");
             responseBox.setSuccess(true);
+        }
+        return responseBox;
+    }
+
+    /**
+     * 爬虫数据接收
+     * @param mapList
+     * @return
+     */
+    @Override
+    public ResponseBox addList(List<Map<String, Object>> mapList) {
+        ResponseBox responseBox = new ResponseBox();
+        String uUid = UUIDUtils.getUUid();
+        for(Map<String,Object> map:mapList){
+            map.put("id",uUid);
+        }
+        Map<String, Object> map = mapList.get(0);
+        steelCommodityMapper.addList(map);
+        //价格批量入库；
+        steelCommodityMapper.addPriceList(mapList);
+        return responseBox;
+    }
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public ResponseBox delete(String id) {
+        ResponseBox responseBox = new ResponseBox();
+        int delete = steelCommodityMapper.delete(id);
+        return new ResponseBox(delete);
+    }
+
+    /**
+     * 删除产品类型
+     * @param id
+     * @return
+     */
+    @Override
+    public ResponseBox deleteType(String id) {
+        ResponseBox responseBox = new ResponseBox();
+        //查询是否存在产品;
+        int i = steelCommodityMapper.queryType(id);
+        if (i > 0) {
+            responseBox.setSuccess(false);
+            responseBox.setMsg("该类型下存在产品，无法删除");
+        }else{
+            steelCommodityMapper.deleteType(id);
+            responseBox.setSuccess(true);
+            responseBox.setMsg("操作成功");
         }
         return responseBox;
     }

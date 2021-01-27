@@ -3,6 +3,7 @@ package com.example.steel.service;
 import com.example.steel.util.QueryHomeBox;
 import com.example.steel.util.ResponseBox;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,6 +36,12 @@ public interface SteelCommodityService {
 
     //修改产品
     ResponseBox updateSteel(Map map);
+
+    ResponseBox addList(List<Map<String,Object>> mapList);
+
+    ResponseBox delete(String id);
+
+    ResponseBox deleteType(String id);
 
 
 

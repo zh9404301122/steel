@@ -3,6 +3,7 @@ package com.example.steel.controller;
 import com.example.steel.service.SteelCommodityService;
 import com.example.steel.util.QueryHomeBox;
 import com.example.steel.util.ResponseBox;
+import com.example.steel.util.UUIDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -98,5 +100,31 @@ public class SteelCommodityController {
     @ResponseBody
     public ResponseBox updateSteel(@RequestBody Map map){
         return steelCommodityService.updateSteel(map);
+    }
+
+
+    /**
+     * 爬虫数据接收;
+     */
+    @RequestMapping(value = "/addList", method = RequestMethod.POST, produces = "application/json;;charset=utf-8")
+    @ResponseBody
+    public ResponseBox addList(@RequestBody List<Map<String,Object>> list){
+        return steelCommodityService.addList(list);
+    }
+
+    /**
+     * 删除产品
+     */
+    @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = "application/json;;charset=utf-8")
+    @ResponseBody
+    public ResponseBox delete(String id){
+        return steelCommodityService.delete(id);
+    }
+
+
+    @RequestMapping(value = "/deleteType", method = RequestMethod.POST, produces = "application/json;;charset=utf-8")
+    @ResponseBody
+    public ResponseBox deleteType(String id){
+        return steelCommodityService.deleteType(id);
     }
 }
